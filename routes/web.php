@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Auth;
 | Controller Imports
 |--------------------------------------------------------------------------
 |
-| Mengimpor semua controller yang akan digunakan dalam file routing ini.
-| Penggunaan alias (as) membantu menghindari konflik nama.
+| Mengimpor semua controller yang akan digunakan untuk menjaga agar definisi
+| route tetap bersih dan mudah dibaca.
 |
 */
+use App\Http\Controllers\WelcomeController;
 
 // Dashboard Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -19,39 +20,45 @@ use App\Http\Controllers\Peserta\DashboardController as PesertaDashboardControll
 use App\Http\Controllers\Pembimbing\Instansi\DashboardController as PembimbingInstansiDashboardController;
 use App\Http\Controllers\Pembimbing\Kominfo\DashboardController as PembimbingKominfoDashboardController;
 
-// Resource Controllers
-use App\Http\Controllers\PesertaController;
-use App\Http\Controllers\PembimbingInstansiController;
-use App\Http\Controllers\PembimbingKominfoController;
-use App\Http\Controllers\KegiatanController;
-use App\Http\Controllers\AbsensiController;
-use App\Http\Controllers\IzinCutiController;
-use App\Http\Controllers\SuratMasukController;
-use App\Http\Controllers\RuanganController;
-use App\Http\Controllers\BeritaController;
+// Admin Resource Controllers
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\RuanganController as AdminRuanganController;
+use App\Http\Controllers\Admin\BeritaController as AdminBeritaController;
+use App\Http\Controllers\Admin\SuratMasukController as AdminSuratMasukController;
 
+// Peserta Resource Controllers
+use App\Http\Controllers\Peserta\LengkapiDataController;
+use App\Http\Controllers\Peserta\KegiatanController as PesertaKegiatanController;
+use App\Http\Controllers\Peserta\AbsensiController as PesertaAbsensiController;
+use App\Http\Controllers\Peserta\IzinCutiController as PesertaIzinCutiController;
 
 /*
-|--------------------------------------------------------------------------
+|------------------ --------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+|
+| Di sini Anda dapat mendaftarkan semua rute untuk aplikasi Anda.
+|
 */
 
-// Halaman utama yang dapat diakses publik
+//==========================================================================
+// RUTE PUBLIK (Dapat Diakses oleh Semua Pengguna, Termasuk Tamu)
+//==========================================================================
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [WelcomeController::class, 'index']);
+
+
+// Route untuk MENAMPILKAN halaman login.
+// Middleware 'guest' memastikan pengguna yang sudah login tidak dapat mengakses halaman ini lagi.
+// Proses backend (POST) ditangani oleh Laravel Fortify secara otomatis.
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+// Catatan: Logika pengalihan setelah login (redirect) tidak ada di sini.
+// Logika tersebut telah dipindahkan ke App\Http\Responses\LoginResponse.php
+// dan didaftarkan di FortifyServiceProvider untuk praktik yang lebih baik.
 
-/**
- * PINTU GERBANG SETELAH LOGIN
- * Route /dashboard utama ini akan memeriksa peran pengguna dan
- * mengarahkan (redirect) mereka ke dashboard yang sesuai.
- */
 Route::get('/dashboard', function () {
     $role = Auth::user()->role;
 
@@ -65,66 +72,85 @@ Route::get('/dashboard', function () {
         case 'pembimbing_kominfo':
             return redirect()->route('pembimbing.kominfo.dashboard');
         default:
-            return redirect('/'); // Fallback jika peran tidak ada
+            // Fallback jika peran tidak dikenal
+            Auth::logout();
+            return redirect('/login')->with('error', 'Peran Anda tidak dikenali.');
     }
 })->middleware(['auth'])->name('dashboard');
 
 
-/*
-|--------------------------------------------------------------------------
-| Grup Route Berdasarkan Peran Pengguna
-|--------------------------------------------------------------------------
-|
-| Semua route di bawah ini memerlukan pengguna untuk login terlebih dahulu.
-| Setiap grup dilindungi oleh prefix dan nama route untuk kerapian,
-| dan idealnya ditambahkan middleware 'role' untuk keamanan.
-|
-*/
-Route::middleware(['auth'])->group(function () {
+//==========================================================================
+// RUTE KHUSUS ADMIN
+//==========================================================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
-    // === GRUP ROUTE UNTUK ADMIN ===
-    Route::prefix('admin')->name('admin.')->group(function () {
-        // ->middleware('role:admin') // <- Tambahkan middleware peran di sini
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    // CRUD untuk manajemen pengguna (akun login)
+    Route::resource('users', AdminUserController::class);
+    Route::get('users/{user}/assign-pembimbing', [AdminUserController::class, 'showAssignForm'])->name('users.assign.form');
+    Route::patch('users/{user}/assign-pembimbing', [AdminUserController::class, 'assignPembimbing'])->name('users.assign.update');
+    // CRUD untuk manajemen data master ruangan/bidang
+    Route::resource('ruangan', AdminRuanganController::class);
 
-        Route::resource('peserta', PesertaController::class);
-        Route::resource('pembimbing-instansi', PembimbingInstansiController::class);
-        Route::resource('pembimbing-kominfo', PembimbingKominfoController::class);
-        Route::resource('ruangan', RuanganController::class);
-        Route::resource('berita', BeritaController::class);
-        Route::resource('surat-masuk', SuratMasukController::class);
+    // CRUD untuk manajemen berita/pengumuman
+    // VERSI BARU (Perbaikan)
+    Route::resource('berita', AdminBeritaController::class)->parameters(['berita' => 'berita']);
+    Route::patch('berita/{berita}/update-status', [AdminBeritaController::class, 'updateStatus'])->name('berita.updateStatus');
+
+    // Manajemen pendaftaran (hanya lihat daftar, detail, dan update status)
+    Route::get('surat-masuk', [AdminSuratMasukController::class, 'index'])->name('surat-masuk.index');
+    Route::patch('surat-masuk/{suratMasuk}/update-status', [AdminSuratMasukController::class, 'updateStatus'])->name('surat-masuk.updateStatus');
+    Route::delete('surat-masuk/{suratMasuk}', [AdminSuratMasukController::class, 'destroy'])->name('surat-masuk.destroy');
+});
+
+
+//==========================================================================
+// RUTE KHUSUS PESERTA
+//==========================================================================
+Route::middleware(['auth', 'role:peserta'])->prefix('peserta')->name('peserta.')->group(function () {
+
+    Route::get('/lengkapi-data', [LengkapiDataController::class, 'index'])->name('lengkapi-data.index');
+    Route::post('/lengkapi-data', [LengkapiDataController::class, 'store'])->name('lengkapi-data.store');
+
+    Route::get('/menunggu-pembimbing', [PesertaDashboardController::class, 'showWaitingPage'])->name('menunggu-pembimbing');
+
+    // Grup baru untuk dashboard utama yang DILINDUNGI oleh middleware
+    Route::middleware(['profile.complete', 'pembimbing.assigned'])->group(function () {
+        Route::get('dashboard', [PesertaDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('kegiatan', PesertaKegiatanController::class);
+        Route::resource('absensi', PesertaAbsensiController::class)->only(['index', 'store']);
+        Route::resource('izin-cuti', PesertaIzinCutiController::class)->only(['index', 'create', 'store', 'show']);
+        // Semua route lain milik peserta taruh di sini
     });
+});
 
-    // === GRUP ROUTE UNTUK PESERTA ===
-    Route::prefix('peserta')->name('peserta.')->group(function () {
-        // ->middleware('role:peserta') // <- Tambahkan middleware peran di sini
 
-        Route::get('/dashboard', [PesertaDashboardController::class, 'index'])->name('dashboard');
+//==========================================================================
+// RUTE KHUSUS PEMBIMBING INSTANSI
+//==========================================================================
+Route::middleware(['auth', 'role:pembimbing_instansi'])->prefix('pembimbing-instansi')->name('pembimbing.instansi.')->group(function () {
 
-        Route::resource('kegiatan', KegiatanController::class);
-        Route::resource('absensi', AbsensiController::class);
-        Route::resource('izin-cuti', IzinCutiController::class);
-    });
+    Route::get('dashboard', [PembimbingInstansiDashboardController::class, 'index'])->name('dashboard');
 
-    // === GRUP ROUTE UNTUK PEMBIMBING INSTANSI ===
-    Route::prefix('pembimbing-instansi')->name('pembimbing.instansi.')->group(function () {
-        // ->middleware('role:pembimbing_instansi') // <- Tambahkan middleware peran di sini
+    // Route untuk memonitor peserta yang dibimbing
+    // Anda perlu membuat method ini di PembimbingInstansiDashboardController
+    // Route::get('peserta', [PembimbingInstansiDashboardController::class, 'listPeserta'])->name('peserta.index');
+    // Route::get('peserta/{peserta}', [PembimbingInstansiDashboardController::class, 'showPeserta'])->name('peserta.show');
 
-        Route::get('/dashboard', [PembimbingInstansiDashboardController::class, 'index'])->name('dashboard');
-        // Route untuk melihat daftar peserta bimbingan
-        Route::get('/bimbingan', [PembimbingInstansiController::class, 'indexBimbingan'])->name('bimbingan.index');
-        Route::get('/bimbingan/{peserta}', [PembimbingInstansiController::class, 'showBimbingan'])->name('bimbingan.show');
-    });
+});
 
-    // === GRUP ROUTE UNTUK PEMBIMBING KOMINFO ===
-    Route::prefix('pembimbing-kominfo')->name('pembimbing.kominfo.')->group(function () {
-        // ->middleware('role:pembimbing_kominfo') // <- Tambahkan middleware peran di sini
 
-        Route::get('/dashboard', [PembimbingKominfoDashboardController::class, 'index'])->name('dashboard');
-         // Route untuk melihat daftar peserta bimbingan
-        Route::get('/bimbingan', [PembimbingKominfoController::class, 'indexBimbingan'])->name('bimbingan.index');
-        Route::get('/bimbingan/{peserta}', [PembimbingKominfoController::class, 'showBimbingan'])->name('bimbingan.show');
-    });
+//==========================================================================
+// RUTE KHUSUS PEMBIMBING KOMINFO
+//==========================================================================
+Route::middleware(['auth', 'role:pembimbing_kominfo'])->prefix('pembimbing-kominfo')->name('pembimbing.kominfo.')->group(function () {
+
+    Route::get('dashboard', [PembimbingKominfoDashboardController::class, 'index'])->name('dashboard');
+
+    // Route untuk memonitor peserta yang dibimbing
+    // Anda perlu membuat method ini di PembimbingKominfoDashboardController
+    // Route::get('peserta', [PembimbingKominfoDashboardController::class, 'listPeserta'])->name('peserta.index');
+    // Route::get('peserta/{peserta}', [PembimbingKominfoDashboardController::class, 'showPeserta'])->name('peserta.show');
 
 });

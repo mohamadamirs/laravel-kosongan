@@ -10,10 +10,12 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Ambil data spesifik untuk peserta yang login
-        $peserta = Auth::user()->peserta->load('pembimbingInstansi', 'pembimbingKominfo');
-        $kegiatanTerakhir = $peserta->kegiatan()->latest()->take(5)->get();
-
-        return view('peserta.dashboard', compact('peserta', 'kegiatanTerakhir'));
+        // Ambil data peserta lengkap dengan relasi ke pembimbing dan user pembimbing
+        // Ini adalah cara paling efisien menggunakan Eager Loading
+        $peserta = Auth::user()->peserta()
+                     ->with(['pembimbingInstansi.user', 'pembimbingKominfo.user'])
+                     ->first();
+        
+        return view('peserta.dashboard', compact('peserta'));
     }
 }

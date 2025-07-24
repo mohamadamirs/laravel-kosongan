@@ -10,7 +10,7 @@ class Berita extends Model
     use HasFactory;
 
     protected $table = 'berita';
-    protected $fillable = ['user_id', 'peserta_id', 'foto', 'judul', 'paragraf'];
+    protected $fillable = ['user_id', 'peserta_id', 'foto', 'judul', 'paragraf','status'];
 
     // Relasi: Satu Berita dibuat oleh satu User
     public function user()

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Peserta;
 
-use App\Models\Peserta;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class PesertaController extends Controller
+class IzinCutiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class PesertaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Peserta $peserta)
+    public function show(string $id)
     {
         //
     }
@@ -42,7 +42,7 @@ class PesertaController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Peserta $peserta)
+    public function edit(string $id)
     {
         //
     }
@@ -50,7 +50,7 @@ class PesertaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Peserta $peserta)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -58,7 +58,7 @@ class PesertaController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Peserta $peserta)
+    public function destroy(string $id)
     {
         //
     }
