@@ -13,12 +13,15 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\ProfileController;
 
 // Dashboard Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Peserta\DashboardController as PesertaDashboardController;
 use App\Http\Controllers\Pembimbing\Instansi\DashboardController as PembimbingInstansiDashboardController;
+use App\Http\Controllers\Pembimbing\Instansi\PesertaController as PembimbingInstansiPesertaController;
 use App\Http\Controllers\Pembimbing\Kominfo\DashboardController as PembimbingKominfoDashboardController;
+use App\Http\Controllers\Pembimbing\Kominfo\PesertaController as PembimbingKominfoPesertaController;
 
 // Admin Resource Controllers
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -58,6 +61,12 @@ Route::get('/login', function () {
 // Catatan: Logika pengalihan setelah login (redirect) tidak ada di sini.
 // Logika tersebut telah dipindahkan ke App\Http\Responses\LoginResponse.php
 // dan didaftarkan di FortifyServiceProvider untuk praktik yang lebih baik.
+
+Route::middleware(['auth'])->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [ProfileController::class, 'show'])->name('show'); // <-- Halaman Tampil Profil
+    Route::get('/edit', [ProfileController::class, 'edit'])->name('edit'); // <-- Halaman Form Edit
+    Route::put('/update', [ProfileController::class, 'update'])->name('update'); // <-- Proses Update
+});
 
 Route::get('/dashboard', function () {
     $role = Auth::user()->role;
@@ -133,11 +142,10 @@ Route::middleware(['auth', 'role:pembimbing_instansi'])->prefix('pembimbing-inst
 
     Route::get('dashboard', [PembimbingInstansiDashboardController::class, 'index'])->name('dashboard');
 
-    // Route untuk memonitor peserta yang dibimbing
-    // Anda perlu membuat method ini di PembimbingInstansiDashboardController
-    // Route::get('peserta', [PembimbingInstansiDashboardController::class, 'listPeserta'])->name('peserta.index');
-    // Route::get('peserta/{peserta}', [PembimbingInstansiDashboardController::class, 'showPeserta'])->name('peserta.show');
-
+    // --- AKTIFKAN DAN PERBAIKI ROUTE INI ---
+    Route::get('peserta', [PembimbingInstansiPesertaController::class, 'index'])->name('peserta.index');
+    // Gunakan {peserta} agar Route-Model Binding berfungsi
+    Route::get('peserta/{peserta}', [PembimbingInstansiDashboardController::class, 'showPeserta'])->name('peserta.show');
 });
 
 
@@ -148,9 +156,10 @@ Route::middleware(['auth', 'role:pembimbing_kominfo'])->prefix('pembimbing-komin
 
     Route::get('dashboard', [PembimbingKominfoDashboardController::class, 'index'])->name('dashboard');
 
-    // Route untuk memonitor peserta yang dibimbing
-    // Anda perlu membuat method ini di PembimbingKominfoDashboardController
-    // Route::get('peserta', [PembimbingKominfoDashboardController::class, 'listPeserta'])->name('peserta.index');
-    // Route::get('peserta/{peserta}', [PembimbingKominfoDashboardController::class, 'showPeserta'])->name('peserta.show');
+    // Route untuk halaman daftar peserta (tabel)
+    Route::get('peserta', [PembimbingKominfoPesertaController::class, 'index'])->name('peserta.index');
+
+    // Route untuk halaman detail satu peserta
+    Route::get('peserta/{peserta}', [PembimbingKominfoDashboardController::class, 'showPeserta'])->name('peserta.show');
 
 });

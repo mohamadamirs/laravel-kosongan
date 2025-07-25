@@ -11,7 +11,7 @@ class PembimbingInstansi extends Model
 
     protected $table = 'pembimbing_instansi';
 
-    protected $fillable = ['user_id', 'peserta_id', 'bidang', 'telepon'];
+    protected $fillable = ['user_id', 'peserta_id', 'bidang', 'telepon', 'foto'];
 
     // Relasi: Satu Pembimbing Instansi milik satu User (untuk login)
     public function user()

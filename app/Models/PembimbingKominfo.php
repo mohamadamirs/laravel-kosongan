@@ -11,7 +11,7 @@ class PembimbingKominfo extends Model
     
     protected $table = 'pembimbing_kominfo';
 
-    protected $fillable = ['user_id', 'peserta_id', 'bidang', 'telepon'];
+    protected $fillable = ['user_id', 'peserta_id', 'bidang', 'telepon','foto'];
 
     // Relasi: Satu Pembimbing Kominfo milik satu User (untuk login)
     public function user()

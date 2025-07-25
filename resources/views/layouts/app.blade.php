@@ -22,6 +22,17 @@
         body {
             font-family: 'Poppins', sans-serif;
         }
+        .brand-link .brand-image {
+            /* Pastikan lebar dan tinggi sama untuk membuat lingkaran sempurna */
+            width: 33px; /* Ukuran default AdminLTE */
+            height: 33px;
+            /* Properti paling penting:
+               - Mencegah gambar menjadi gepeng/terdistorsi.
+               - Gambar akan diskalakan untuk menutupi area, dan sisanya akan dipotong. */
+            object-fit: cover !important;
+            border-radius: 50%;
+        }
+
     </style>
 </head>
 

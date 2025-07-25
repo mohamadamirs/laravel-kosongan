@@ -3,63 +3,56 @@
 namespace App\Http\Controllers\Peserta;
 
 use App\Http\Controllers\Controller;
+use App\Models\IzinCuti;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class IzinCutiController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan halaman riwayat dan form pengajuan izin/cuti.
      */
     public function index()
     {
-        //
+        $riwayatIzin = Auth::user()->peserta->izinCuti()
+                           ->latest('tanggal') // Urutkan dari tanggal terbaru
+                           ->paginate(10);
+        
+        return view('peserta.izin-cuti.index', compact('riwayatIzin'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form untuk membuat pengajuan baru.
      */
     public function create()
     {
-        //
+        return view('peserta.izin-cuti.create');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan pengajuan izin/cuti baru ke database.
      */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'tanggal' => 'required|date|after_or_equal:today',
+            'keterangan' => 'required|string|max:500',
+            'bukti_foto' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Bukti foto wajib
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $pesertaId = Auth::user()->peserta->id;
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        $path = $request->file('bukti_foto')->store('izin_cuti', 'public');
+        $namaFile = basename($path);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        IzinCuti::create([
+            'peserta_id' => $pesertaId,
+            'tanggal' => $request->tanggal,
+            'keterangan' => $request->keterangan,
+            'bukti_foto' => $namaFile,
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('peserta.izin-cuti.index')
+                         ->with('success', 'Pengajuan izin/cuti Anda berhasil dikirim.');
     }
 }
