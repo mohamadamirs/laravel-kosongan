@@ -4,5 +4,5 @@
         Versi 1.0.0
     </div>
     <!-- Default to the left -->
-    <strong>Copyright © {{ date('Y') }} <a href="#">Nama Perusahaan Anda</a>.</strong> All rights reserved.
+    <strong>Copyright © {{ date('Y') }} <a href="#">Bachtiar rama</a>.</strong> All rights reserved.
 </footer>

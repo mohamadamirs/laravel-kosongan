@@ -32,14 +32,11 @@ class DashboardController extends Controller
             abort(403, 'AKSES DITOLAK: ANDA TIDAK MEMBIMBING PESERTA INI.');
         }
 
-        $peserta->load(['kegiatan' => function ($query) {
-            $query->latest('tanggal');
-        }, 'absensi' => function ($query) {
-            $query->latest('tanggal');
-        }, 'izinCuti' => function ($query) {
-            $query->latest('tanggal');
-        }]);
+        // Paginate setiap relasi
+        $kegiatan = $peserta->kegiatan()->latest('tanggal')->paginate(5);
+        $absensi = $peserta->absensi()->latest('tanggal')->paginate(5);
+        $izinCuti = $peserta->izinCuti()->latest('tanggal')->paginate(5);
 
-        return view('pembimbing.instansi.show_peserta', compact('peserta'));
+        return view('pembimbing.instansi.show_peserta', compact('peserta', 'kegiatan', 'absensi', 'izinCuti'));
     }
 }
