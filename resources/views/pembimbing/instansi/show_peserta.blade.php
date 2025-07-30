@@ -68,7 +68,7 @@
                         @empty
                             <p class="text-center text-muted">Peserta belum melaporkan kegiatan harian.</p>
                         @endforelse
-                        <div class="mt-3">{{ $kegiatan->links() }}</div>
+                        <div class="mt-3">{{ $kegiatan->appends(['page_kegiatan' => $kegiatan->currentPage()])->links() }}</div>
                     </div>
                     {{-- TAB ABSENSI --}}
                     <div class="tab-pane" id="absensi">
@@ -85,7 +85,7 @@
                             <li class="list-group-item text-center text-muted">Belum ada riwayat absensi.</li>
                         @endforelse
                         </ul>
-                        <div class="mt-3">{{ $absensi->links() }}</div>
+                        <div class="mt-3">{{ $absensi->appends(['page_absensi' => $absensi->currentPage()])->links() }}</div>
                     </div>
                     {{-- TAB IZIN --}}
                     <div class="tab-pane" id="izin">
@@ -100,7 +100,7 @@
                          @empty
                             <p class="text-center text-muted">Peserta tidak memiliki riwayat izin atau cuti.</p>
                         @endforelse
-                        <div class="mt-3">{{ $izinCuti->links() }}</div>
+                        <div class="mt-3">{{ $izinCuti->appends(['page_izin_cuti' => $izinCuti->currentPage()])->links() }}</div>
                     </div>
                 </div>
             </div>

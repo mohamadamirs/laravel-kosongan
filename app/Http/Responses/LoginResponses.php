@@ -25,7 +25,7 @@ class LoginResponse implements LoginResponseContract
             case 'pembimbing_instansi':
                 return redirect()->route('pembimbing.instansi.dashboard');
             case 'pembimbing_kominfo':
-                return redirect()->route('pembimbing.kominfo.dashboard');
+                return redirect()->route('pembimbing.lapangan.dashboard');
             default:
                 // Fallback jika peran tidak dikenali, arahkan ke halaman utama
                 return redirect('/');

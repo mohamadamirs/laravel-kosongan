@@ -54,7 +54,15 @@
                                     case 'pembimbing_kominfo': $roleClass = 'badge-success'; break;
                                 }
                             @endphp
-                            <span class="badge {{ $roleClass }}">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</span>
+                            @php
+                                $roleName = str_replace('_', ' ', $user->role);
+                                if ($user->role == 'pembimbing_instansi') {
+                                    $roleName = 'Pembimbing Guru/Dosen';
+                                } elseif ($user->role == 'pembimbing_kominfo') {
+                                    $roleName = 'Pembimbing Lapangan';
+                                }
+                            @endphp
+                            <span class="badge {{ $roleClass }}">{{ ucfirst($roleName) }}</span>
                         </td>
                         <td>
                             {{-- Tampilkan tombol khusus hanya untuk peran 'peserta' --}}

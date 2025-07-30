@@ -7,7 +7,7 @@
     <div class="col-sm-6"><h1 class="m-0">Peserta Bimbingan</h1></div>
     <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="{{ route('pembimbing.kominfo.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('pembimbing.lapangan.dashboard') }}">Dashboard</a></li>
             <li class="breadcrumb-item active">Peserta Bimbingan</li>
         </ol>
     </div>
@@ -41,7 +41,7 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{{ route('pembimbing.kominfo.peserta.show', $peserta->id) }}" class="btn btn-info btn-sm">
+                            <a href="{{ route('pembimbing.lapangan.peserta.show', $peserta->id) }}" class="btn btn-info btn-sm">
                                 <i class="fas fa-eye"></i> Detail
                             </a>
                         </td>

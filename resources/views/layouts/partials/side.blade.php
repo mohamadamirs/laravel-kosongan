@@ -11,7 +11,7 @@
                 $fotoUrl = asset('storage/peserta/fotos/' . $profile->gambar);
             }
         } elseif (in_array($user->role, ['pembimbing_instansi', 'pembimbing_kominfo'])) {
-            $profile = $user->pembimbingInstansi ?? $user->pembimbingKominfo;
+            $profile = $user->pembimbingInstansi ?? $user->pembimbingLapangan;
             // Menggunakan kolom 'foto' dan path yang benar untuk pembimbing
             if ($profile && $profile->foto) {
                 $fotoUrl = asset('storage/avatars/' . $profile->foto);
@@ -139,7 +139,7 @@
                 {{-- ====================================================== --}}
                 @if (in_array($user->role, ['pembimbing_instansi', 'pembimbing_kominfo']))
                     @php
-                        $prefix = $user->role == 'pembimbing_instansi' ? 'pembimbing.instansi.' : 'pembimbing.kominfo.';
+                        $prefix = $user->role == 'pembimbing_instansi' ? 'pembimbing.instansi.' : 'pembimbing.lapangan.';
                     @endphp
                     <li class="nav-header">MENU PEMBIMBING</li>
                     <li class="nav-item">

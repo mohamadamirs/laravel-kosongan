@@ -27,18 +27,18 @@
     @endif
 
     <div class="row">
-        {{-- Kartu Informasi Pembimbing Instansi --}}
+        {{-- Kartu Informasi Pembimbing Guru/Dosen --}}
         <div class="col-md-6">
             <div class="card card-primary card-outline">
                 <div class="card-header">
-                    <h5 class="card-title m-0"><i class="fas fa-user-tie"></i> Pembimbing Instansi</h5>
+                    <h5 class="card-title m-0"><i class="fas fa-user-tie"></i> Pembimbing Guru/Dosen</h5>
                 </div>
                 <div class="card-body">
                     @if ($peserta->pembimbingInstansi)
                         <h6 class="card-title">
                             <b>{{ $peserta->pembimbingInstansi->user->name ?? 'Nama Tidak Tersedia' }}</b></h6>
                         <p class="card-text">
-                            Berikut adalah detail pembimbing dari sekolah/kampus yang akan memonitor Anda.
+                            Berikut adalah detail pembimbing guru/dosen yang akan memonitor Anda.
                         </p>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item"><b>Bidang:</b> {{ $peserta->pembimbingInstansi->bidang }}</li>
@@ -58,7 +58,7 @@
         <div class="col-md-6">
             <div class="card card-success card-outline">
                 <div class="card-header">
-                    <h5 class="card-title m-0"><i class="fas fa-user-shield"></i> Pembimbing Kominfo (Lapangan)</h5>
+                    <h5 class="card-title m-0"><i class="fas fa-user-shield"></i> Pembimbing Lapangan</h5>
                 </div>
                 <div class="card-body">
                     @if ($peserta->pembimbingKominfo)

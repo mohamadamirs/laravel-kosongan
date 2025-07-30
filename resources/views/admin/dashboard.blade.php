@@ -52,11 +52,11 @@
         </div>
     </div>
     <div class="col-lg-3 col-6">
-        {{-- Info Box untuk Pembimbing Instansi --}}
+        {{-- Info Box untuk Pembimbing Guru/Dosen --}}
         <div class="small-box bg-success">
             <div class="inner">
                 <h3>{{ $jumlahPembimbingInstansi }}</h3>
-                <p>Pembimbing Instansi</p>
+                <p>Pembimbing Guru/Dosen</p>
             </div>
             <div class="icon">
                 <i class="fas fa-user-tie"></i>
@@ -72,7 +72,7 @@
         <div class="small-box bg-danger">
             <div class="inner">
                 <h3>{{ $jumlahPembimbingKominfo }}</h3>
-                <p>Pembimbing Kominfo</p>
+                <p>Pembimbing Lapangan</p>
             </div>
             <div class="icon">
                 <i class="fas fa-user-shield"></i>

@@ -28,8 +28,8 @@
             <option value="">-- Pilih Peran --</option>
             <option value="admin" {{ (old('role', $user->role ?? '') == 'admin') ? 'selected' : '' }}>Admin</option>
             <option value="peserta" {{ (old('role', $user->role ?? '') == 'peserta') ? 'selected' : '' }}>Peserta</option>
-            <option value="pembimbing_instansi" {{ (old('role', $user->role ?? '') == 'pembimbing_instansi') ? 'selected' : '' }}>Pembimbing Instansi</option>
-            <option value="pembimbing_kominfo" {{ (old('role', $user->role ?? '') == 'pembimbing_kominfo') ? 'selected' : '' }}>Pembimbing Kominfo</option>
+            <option value="pembimbing_instansi" {{ (old('role', $user->role ?? '') == 'pembimbing_instansi') ? 'selected' : '' }}>Pembimbing Guru/Dosen</option>
+            <option value="pembimbing_kominfo" {{ (old('role', $user->role ?? '') == 'pembimbing_kominfo') ? 'selected' : '' }}>Pembimbing Lapangan</option>
         </select>
         @error('role')
         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>

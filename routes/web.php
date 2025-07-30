@@ -21,8 +21,8 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Peserta\DashboardController as PesertaDashboardController;
 use App\Http\Controllers\Pembimbing\Instansi\DashboardController as PembimbingInstansiDashboardController;
 use App\Http\Controllers\Pembimbing\Instansi\PesertaController as PembimbingInstansiPesertaController;
-use App\Http\Controllers\Pembimbing\Kominfo\DashboardController as PembimbingKominfoDashboardController;
-use App\Http\Controllers\Pembimbing\Kominfo\PesertaController as PembimbingKominfoPesertaController;
+use App\Http\Controllers\Pembimbing\Lapangan\DashboardController as PembimbingLapanganDashboardController;
+use App\Http\Controllers\Pembimbing\Lapangan\PesertaController as PembimbingLapanganPesertaController;
 
 // Admin Resource Controllers
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -80,7 +80,7 @@ Route::get('/dashboard', function () {
         case 'pembimbing_instansi':
             return redirect()->route('pembimbing.instansi.dashboard');
         case 'pembimbing_kominfo':
-            return redirect()->route('pembimbing.kominfo.dashboard');
+            return redirect()->route('pembimbing.lapangan.dashboard');
         default:
             // Fallback jika peran tidak dikenal
             Auth::logout();
@@ -142,7 +142,7 @@ Route::middleware(['auth', 'role:peserta'])->prefix('peserta')->name('peserta.')
 
 
 //==========================================================================
-// RUTE KHUSUS PEMBIMBING INSTANSI
+// RUTE KHUSUS PEMBIMBING GURU/DOSEN
 //==========================================================================
 Route::middleware(['auth', 'role:pembimbing_instansi'])->prefix('pembimbing-instansi')->name('pembimbing.instansi.')->group(function () {
 
@@ -156,15 +156,15 @@ Route::middleware(['auth', 'role:pembimbing_instansi'])->prefix('pembimbing-inst
 
 
 //==========================================================================
-// RUTE KHUSUS PEMBIMBING KOMINFO
+// RUTE KHUSUS PEMBIMBING LAPANGAN
 //==========================================================================
-Route::middleware(['auth', 'role:pembimbing_kominfo'])->prefix('pembimbing-kominfo')->name('pembimbing.kominfo.')->group(function () {
+Route::middleware(['auth', 'role:pembimbing_kominfo'])->prefix('pembimbing-lapangan')->name('pembimbing.lapangan.')->group(function () {
 
-    Route::get('dashboard', [PembimbingKominfoDashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [PembimbingLapanganDashboardController::class, 'index'])->name('dashboard');
 
     // Route untuk halaman daftar peserta (tabel)
-    Route::get('peserta', [PembimbingKominfoPesertaController::class, 'index'])->name('peserta.index');
+    Route::get('peserta', [PembimbingLapanganPesertaController::class, 'index'])->name('peserta.index');
 
     // Route untuk halaman detail satu peserta
-    Route::get('peserta/{peserta}', [PembimbingKominfoDashboardController::class, 'showPeserta'])->name('peserta.show');
+    Route::get('peserta/{peserta}', [PembimbingLapanganDashboardController::class, 'showPeserta'])->name('peserta.show');
 });

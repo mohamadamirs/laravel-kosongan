@@ -23,7 +23,7 @@ class DashboardController extends Controller
             // Ini adalah kasus darurat. Seharusnya tidak terjadi jika middleware 'role' bekerja.
             // Arahkan keluar dengan pesan error.
             Auth::logout();
-            return redirect('/login')->with('error', 'Profil Pembimbing Instansi Anda tidak ditemukan. Harap hubungi Admin.');
+            return redirect('/login')->with('error', 'Profil Pembimbing Guru/Dosen Anda tidak ditemukan. Harap hubungi Admin.');
         }
 
         // 3. Jika profil ada, hitung jumlah pesertanya.
@@ -43,7 +43,7 @@ class DashboardController extends Controller
         // Periksa lagi di sini untuk keamanan
         if (!$pembimbing) {
              Auth::logout();
-             return redirect('/login')->with('error', 'Profil Pembimbing Instansi Anda tidak ditemukan.');
+             return redirect('/login')->with('error', 'Profil Pembimbing Guru/Dosen Anda tidak ditemukan.');
         }
 
         // Lakukan Pengecekan Otorisasi
@@ -51,8 +51,13 @@ class DashboardController extends Controller
             abort(403, 'AKSES DITOLAK: ANDA TIDAK MEMBIMBING PESERTA INI.');
         }
 
-        $peserta->load(['kegiatan' => function ($query) { $query->latest('tanggal'); }, 'absensi' => function ($query) { $query->latest('tanggal'); }, 'izinCuti' => function ($query) { $query->latest('tanggal'); }]);
+        $peserta->load(['kegiatan', 'absensi', 'izinCuti']);
 
-        return view('pembimbing.instansi.show_peserta', compact('peserta'));
+        $kegiatan = $peserta->kegiatan()->latest('tanggal')->paginate(5, ['*'], 'kegiatan_page');
+        $absensi = $peserta->absensi()->latest('tanggal')->paginate(5, ['*'], 'absensi_page');
+        $izinCuti = $peserta->izinCuti()->latest('tanggal')->paginate(5, ['*'], 'izin_cuti_page');
+
+
+        return view('pembimbing.instansi.show_peserta', compact('peserta', 'kegiatan', 'absensi', 'izinCuti'));
     }
 }

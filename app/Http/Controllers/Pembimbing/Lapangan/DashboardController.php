@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Pembimbing\Kominfo;
+namespace App\Http\Controllers\Pembimbing\Lapangan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Peserta;
@@ -20,14 +20,14 @@ class DashboardController extends Controller
         // 2. Periksa apakah profil ada
         if (!$pembimbing) {
             Auth::logout();
-            return redirect('/login')->with('error', 'Profil Pembimbing Kominfo Anda tidak ditemukan. Harap hubungi Admin.');
+            return redirect('/login')->with('error', 'Profil Pembimbing Lapangan Anda tidak ditemukan. Harap hubungi Admin.');
         }
 
         // 3. Hitung jumlah peserta
         $jumlahPeserta = $pembimbing->peserta()->count();
         
         // 4. Kirim data ke view
-        return view('pembimbing.kominfo.dashboard', compact('jumlahPeserta'));
+        return view('pembimbing.lapangan.dashboard', compact('jumlahPeserta'));
     }
 
 
@@ -37,8 +37,9 @@ class DashboardController extends Controller
      */
     public function showPeserta(Peserta $peserta)
     {
-        $pembimbingId = Auth::user()->pembimbingInstansi->id;
-        if ($peserta->pembimbing_instansi_id !== $pembimbingId) {
+        $pembimbing = Auth::user()->pembimbingKominfo;
+
+        if (!$pembimbing || $peserta->pembimbing_kominfo_id !== $pembimbing->id) {
             abort(403, 'AKSES DITOLAK: ANDA TIDAK MEMBIMBING PESERTA INI.');
         }
 
@@ -47,6 +48,6 @@ class DashboardController extends Controller
         $absensi = $peserta->absensi()->latest('tanggal')->paginate(5);
         $izinCuti = $peserta->izinCuti()->latest('tanggal')->paginate(5);
 
-        return view('pembimbing.kominfo.show_peserta', compact('peserta', 'kegiatan', 'absensi', 'izinCuti'));
+        return view('pembimbing.lapangan.show_peserta', compact('peserta', 'kegiatan', 'absensi', 'izinCuti'));
     }
 }

@@ -27,7 +27,7 @@
         @method('PATCH')
         <div class="card-body">
             <div class="form-group">
-                <label for="pembimbing_instansi_id">Pilih Pembimbing Instansi</label>
+                <label for="pembimbing_instansi_id">Pilih Pembimbing Guru/Dosen</label>
                 <select class="form-control @error('pembimbing_instansi_id') is-invalid @enderror" id="pembimbing_instansi_id" name="pembimbing_instansi_id" required>
                     <option value="">-- Silakan Pilih --</option>
                     @foreach($pembimbingInstansi as $pembimbing)
@@ -43,7 +43,7 @@
             </div>
 
             <div class="form-group">
-                <label for="pembimbing_kominfo_id">Pilih Pembimbing Kominfo (Lapangan)</label>
+                <label for="pembimbing_kominfo_id">Pilih Pembimbing Lapangan</label>
                 <select class="form-control @error('pembimbing_kominfo_id') is-invalid @enderror" id="pembimbing_kominfo_id" name="pembimbing_kominfo_id" required>
                     <option value="">-- Silakan Pilih --</option>
                     @foreach($pembimbingKominfo as $pembimbing)

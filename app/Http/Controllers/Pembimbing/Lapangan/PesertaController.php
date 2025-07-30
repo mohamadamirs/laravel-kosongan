@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Pembimbing\Kominfo;
+namespace App\Http\Controllers\Pembimbing\Lapangan;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -18,6 +18,6 @@ class PesertaController extends Controller
         $pesertaBimbingan = $pembimbing->peserta()->with('user')->paginate(15);
         
         // Arahkan ke view yang benar
-        return view('pembimbing.kominfo.peserta.index', compact('pesertaBimbingan'));
+        return view('pembimbing.lapangan.peserta.index', compact('pesertaBimbingan'));
     }
 }

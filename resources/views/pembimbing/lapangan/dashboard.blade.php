@@ -27,7 +27,7 @@
                 <i class="fas fa-users"></i>
             </div>
             {{-- Link ini mengarah ke halaman daftar peserta yang berisi tabel --}}
-            <a href="{{ route('pembimbing.kominfo.peserta.index') }}" class="small-box-footer">
+            <a href="{{ route('pembimbing.lapangan.peserta.index') }}" class="small-box-footer">
                 Lihat Daftar Lengkap <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
