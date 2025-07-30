@@ -83,4 +83,8 @@ class AbsensiController extends Controller
         return redirect()->route('peserta.absensi.index')
                          ->with('success', 'Absensi berhasil dicatat pada pukul ' . now()->format('H:i') . '. Terima kasih!');
     }
+     public function showScanner()
+    {
+        return view('peserta.absensi.scan');
+    }
 }

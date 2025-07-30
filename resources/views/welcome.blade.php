@@ -98,7 +98,7 @@
                 <h1 class="display-4 fw-bold">Sistem Informasi PKL Terpadu</h1>
                 <p class="lead hero-text-lead col-md-8 mx-auto mt-3">Platform untuk memudahkan proses pengajuan, pendaftaran, dan manajemen Praktek Kerja Lapangan secara transparan dan efisien.</p>
                 <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
-                    <a href="#availability" class="btn btn-light btn-lg px-4 fw-bold">Cek Ketersediaan Bidang</a>
+                    <a href="#availability" class="btn btn-light btn-lg px-4 fw-bold">Cek Ketersediaan Kouta</a>
                 </div>
             </div>
         </section>
@@ -121,14 +121,14 @@
         <section id="availability" class="py-5 bg-light">
             <div class="container">
                 <div class="text-center">
-                    <h2 class="section-title">Ketersediaan Bidang PKL</h2>
+                    <h2 class="section-title">Ketersediaan Kouta PKL</h2>
                     <p class="text-muted col-md-8 mx-auto mb-4">Pilih bidang di bawah ini untuk melihat detail dan kuota yang tersedia.</p>
                 </div>
 
                 <div class="row justify-content-center my-4">
                     <div class="col-md-8 col-lg-6">
                          <select class="form-select form-select-lg" aria-label="Pilih Bidang PKL">
-                            <option selected>-- Klik untuk melihat semua bidang --</option>
+                            <option selected>-- Klik untuk melihat ketersediaan --</option>
                             {{-- Loop melalui variabel $ruanganTersedia dari controller --}}
                             @forelse($ruanganTersedia as $ruangan)
                                 <option value="{{ $ruangan->id }}">
@@ -182,17 +182,17 @@
 
             </div>
         </section>
-        
+{{--         
         <section class="py-5 bg-light">
             <div class="container">
                 <div class="text-center">
                     <h2 class="section-title">Pertanyaan Umum (FAQ)</h2>
                 </div>
-                <div class="accordion col-md-8 mx-auto" id="faqAccordion">
+                <div class="accordion col-md-8 mx-auto" id="faqAccordion"> --}}
                     {{-- ... Konten FAQ ... --}}
-                </div>
+                {{-- </div>
             </div>
-        </section>
+        </section> --}}
     </main>
 
     <footer class="py-4 bg-dark text-white text-center">

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 */
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AbsensiScanController;
 
 // Dashboard Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -88,12 +89,17 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 
+Route::get('/absensi/scan/{peserta}', [AbsensiScanController::class, 'recordAttendance'])->name('absensi.scan');
+
 //==========================================================================
 // RUTE KHUSUS ADMIN
 //==========================================================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // routes/web.php (di dalam grup admin)
+    Route::get('users/{user}/qr-code', [AdminUserController::class, 'generateQrCode'])->name('users.qr');
 
     // CRUD untuk manajemen pengguna (akun login)
     Route::resource('users', AdminUserController::class);
@@ -130,7 +136,7 @@ Route::middleware(['auth', 'role:peserta'])->prefix('peserta')->name('peserta.')
         Route::resource('kegiatan', PesertaKegiatanController::class);
         Route::resource('absensi', PesertaAbsensiController::class)->only(['index', 'store']);
         Route::resource('izin-cuti', PesertaIzinCutiController::class)->only(['index', 'create', 'store', 'show']);
-        // Semua route lain milik peserta taruh di sini
+        Route::get('absensi/scan', [PesertaAbsensiController::class, 'showScanner'])->name('absensi.scan.show');
     });
 });
 
@@ -161,5 +167,4 @@ Route::middleware(['auth', 'role:pembimbing_kominfo'])->prefix('pembimbing-komin
 
     // Route untuk halaman detail satu peserta
     Route::get('peserta/{peserta}', [PembimbingKominfoDashboardController::class, 'showPeserta'])->name('peserta.show');
-
 });

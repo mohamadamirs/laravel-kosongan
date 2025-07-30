@@ -12,14 +12,24 @@ class DashboardController extends Controller
     /**
      * Menampilkan dashboard utama pembimbing dengan data ringkasan.
      */
-    public function index()
+       public function index()
     {
-        // 1. Hitung jumlah peserta yang dibimbing oleh pembimbing yang login
-        $jumlahPeserta = Auth::user()->pembimbingInstansi->peserta()->count();
+        // 1. Dapatkan profil pembimbing
+        $pembimbing = Auth::user()->pembimbingKominfo;
+
+        // 2. Periksa apakah profil ada
+        if (!$pembimbing) {
+            Auth::logout();
+            return redirect('/login')->with('error', 'Profil Pembimbing Kominfo Anda tidak ditemukan. Harap hubungi Admin.');
+        }
+
+        // 3. Hitung jumlah peserta
+        $jumlahPeserta = $pembimbing->peserta()->count();
         
-        // 2. Kirim data JUMLAH ini ke view 'dashboard'
+        // 4. Kirim data ke view
         return view('pembimbing.kominfo.dashboard', compact('jumlahPeserta'));
     }
+
 
     /**
      * Menampilkan halaman detail lengkap dari satu peserta.

@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
-
+use Illuminate\Support\Facades\URL; // <-- Tambahkan ini
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 class UserController extends Controller
 {
     /**
@@ -20,9 +24,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Eager load relasi untuk efisiensi jika Anda ingin menampilkan data terkait di view
-        $users = User::with('peserta', 'pembimbingInstansi', 'pembimbingKominfo')
-                     ->latest()->paginate(10);
+        $users = User::latest()->paginate(10);
         return view('admin.users.index', compact('users'));
     }
 
@@ -39,7 +41,6 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // Definisikan aturan validasi dasar
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -47,19 +48,15 @@ class UserController extends Controller
             'role' => ['required', Rule::in(['admin', 'peserta', 'pembimbing_instansi', 'pembimbing_kominfo'])],
         ];
 
-        // Tambahkan aturan validasi kondisional jika peran adalah 'peserta'
         if ($request->role === 'peserta') {
             $rules['mulai_magang'] = ['required', 'date'];
             $rules['selesai_magang'] = ['required', 'date', 'after_or_equal:mulai_magang'];
         }
 
-        // Jalankan validasi
         $request->validate($rules);
 
-        // Gunakan Transaksi Database untuk menjamin konsistensi data
         try {
             DB::transaction(function () use ($request) {
-                // Buat record di tabel 'users'
                 $user = User::create([
                     'name' => $request->name,
                     'email' => $request->email,
@@ -67,7 +64,6 @@ class UserController extends Controller
                     'role' => $request->role,
                 ]);
 
-                // Buat record awal di tabel profil yang sesuai
                 switch ($user->role) {
                     case 'peserta':
                         $user->peserta()->create([
@@ -77,7 +73,7 @@ class UserController extends Controller
                             'pembimbing_kominfo_id' => null,
                             'mulai_magang' => $request->mulai_magang,
                             'selesai_magang' => $request->selesai_magang,
-                            'nisn' => null, // Menggunakan NULL untuk menghindari error UNIQUE constraint
+                            'nisn' => null,
                             'gambar' => 'default.png',
                             'asal_sekolah' => 'BELUM DIISI',
                             'kelas' => 'BELUM DIISI',
@@ -87,19 +83,11 @@ class UserController extends Controller
                             'alamat' => 'BELUM DIISI',
                         ]);
                         break;
-
                     case 'pembimbing_instansi':
-                        $user->pembimbingInstansi()->create([
-                            'telepon' => 'BELUM DIISI',
-                            'bidang' => 'BELUM DIISI',
-                        ]);
+                        $user->pembimbingInstansi()->create(['telepon' => 'BELUM DIISI', 'bidang' => 'BELUM DIISI']);
                         break;
-
                     case 'pembimbing_kominfo':
-                        $user->pembimbingKominfo()->create([
-                            'telepon' => 'BELUM DIISI',
-                            'bidang' => 'BELUM DIISI',
-                        ]);
+                        $user->pembimbingKominfo()->create(['telepon' => 'BELUM DIISI', 'bidang' => 'BELUM DIISI']);
                         break;
                 }
             });
@@ -107,8 +95,7 @@ class UserController extends Controller
             return back()->with('error', 'Terjadi kesalahan saat membuat pengguna: ' . $e->getMessage())->withInput();
         }
 
-        return redirect()->route('admin.users.index')
-                         ->with('success', 'Akun pengguna baru dan profil awalnya berhasil ditambahkan.');
+        return redirect()->route('admin.users.index')->with('success', 'Akun pengguna baru berhasil ditambahkan.');
     }
 
     /**
@@ -116,8 +103,7 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        // Load relasi agar bisa diakses di form edit (misalnya untuk mengambil tanggal magang)
-        $user->load('peserta', 'pembimbingInstansi', 'pembimbingKominfo');
+        $user->load('peserta');
         return view('admin.users.edit', compact('user'));
     }
 
@@ -126,7 +112,6 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        // Definisikan aturan validasi dasar
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
@@ -134,98 +119,96 @@ class UserController extends Controller
             'role' => ['required', Rule::in(['admin', 'peserta', 'pembimbing_instansi', 'pembimbing_kominfo'])],
         ];
 
-        // Tambahkan aturan validasi kondisional jika user yang diedit adalah peserta
         if ($request->role === 'peserta') {
             $rules['mulai_magang'] = ['required', 'date'];
             $rules['selesai_magang'] = ['required', 'date', 'after_or_equal:mulai_magang'];
         }
 
-        // Jalankan validasi
         $request->validate($rules);
 
-        // Gunakan Transaksi Database
         try {
             DB::transaction(function () use ($request, $user) {
-                // Update data di tabel 'users'
                 $userData = $request->only(['name', 'email', 'role']);
                 if ($request->filled('password')) {
                     $userData['password'] = Hash::make($request->password);
                 }
                 $user->update($userData);
 
-                // Update profil yang terkait
                 if ($user->role === 'peserta' && $user->peserta) {
-                    $user->peserta->update([
-                        'mulai_magang' => $request->mulai_magang,
-                        'selesai_magang' => $request->selesai_magang,
-                        // Jika admin bisa mengedit nama, sinkronkan juga ke tabel peserta
-                        'nama' => $request->name,
-                    ]);
+                    $user->peserta->update(['mulai_magang' => $request->mulai_magang, 'selesai_magang' => $request->selesai_magang, 'nama' => $request->name]);
                 }
-                // (Anda bisa menambahkan logika 'else if' untuk update pembimbing di sini jika perlu)
             });
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan saat memperbarui pengguna: ' . $e->getMessage())->withInput();
         }
 
-        return redirect()->route('admin.users.index')
-                         ->with('success', 'Data pengguna berhasil diperbarui.');
+        return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui.');
     }
 
     /**
      * Menghapus pengguna dari database.
-     * Aturan cascade on delete di database akan menghapus profil terkait.
      */
     public function destroy(User $user)
     {
-        // Mencegah admin menghapus dirinya sendiri
         if ($user->id == auth()->id()) {
-            return redirect()->route('admin.users.index')
-                             ->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+            return redirect()->route('admin.users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
-
         $user->delete();
-
-        return redirect()->route('admin.users.index')
-                         ->with('success', 'Pengguna berhasil dihapus.');
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 
-     public function showAssignForm(User $user)
+    /**
+     * Menampilkan form untuk menugaskan pembimbing ke seorang user peserta.
+     */
+    public function showAssignForm(User $user)
     {
-        // 1. Pastikan user yang dipilih adalah seorang peserta
         if ($user->role !== 'peserta' || !$user->peserta) {
-            return redirect()->route('admin.users.index')
-                             ->with('error', 'Hanya pengguna dengan peran peserta yang dapat ditugaskan pembimbing.');
+            return redirect()->route('admin.users.index')->with('error', 'Hanya pengguna dengan peran peserta yang dapat ditugaskan pembimbing.');
         }
-
-        // 2. Ambil semua data pembimbing yang tersedia
         $pembimbingInstansi = PembimbingInstansi::with('user')->get();
         $pembimbingKominfo = PembimbingKominfo::with('user')->get();
-
-        // 3. Kirim data ke view
         return view('admin.users.assign', compact('user', 'pembimbingInstansi', 'pembimbingKominfo'));
     }
-     public function assignPembimbing(Request $request, User $user)
+
+    /**
+     * Memproses dan menyimpan data penugasan pembimbing.
+     */
+    public function assignPembimbing(Request $request, User $user)
     {
-        // 1. Pastikan user yang dipilih adalah seorang peserta
         if ($user->role !== 'peserta' || !$user->peserta) {
             abort(403, 'Aksi tidak diizinkan.');
         }
-        
-        // 2. Validasi input
-        $request->validate([
-            'pembimbing_instansi_id' => 'required|exists:pembimbing_instansi,id',
-            'pembimbing_kominfo_id' => 'required|exists:pembimbing_kominfo,id',
-        ]);
-        
-        // 3. Update profil peserta, bukan user-nya
-        $user->peserta->update([
-            'pembimbing_instansi_id' => $request->pembimbing_instansi_id,
-            'pembimbing_kominfo_id' => $request->pembimbing_kominfo_id,
-        ]);
+        $request->validate(['pembimbing_instansi_id' => 'required|exists:pembimbing_instansi,id', 'pembimbing_kominfo_id' => 'required|exists:pembimbing_kominfo,id']);
+        $user->peserta->update(['pembimbing_instansi_id' => $request->pembimbing_instansi_id, 'pembimbing_kominfo_id' => $request->pembimbing_kominfo_id]);
+        return redirect()->route('admin.users.index')->with('success', 'Pembimbing berhasil ditugaskan untuk ' . $user->name);
+    }
 
-        // 4. Redirect dengan pesan sukses
-        return redirect()->route('admin.users.index')
-                         ->with('success', 'Pembimbing berhasil ditugaskan untuk ' . $user->name);
+    /**
+     * Menghasilkan gambar QR code untuk absensi seorang peserta.
+     */
+    public function generateQrCode(User $user)
+    {
+        if ($user->role !== 'peserta' || !$user->peserta) {
+            abort(404, 'Peserta tidak ditemukan.');
+        }
+
+        // URL yang aman dan berbatas waktu tetap sama
+        $signedUrl = URL::temporarySignedRoute(
+            'absensi.scan',
+            now()->addMinutes(1),
+            ['peserta' => $user->peserta->id]
+        );
+
+        // --- LOGIKA BARU UNTUK MEMBUAT QR CODE DENGAN BACON/BACON-QR-CODE ---
+        $renderer = new ImageRenderer(
+            new RendererStyle(250), // Ukuran QR Code dalam piksel
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $qrCode = $writer->writeString($signedUrl);
+        // -----------------------------------------------------------------
+
+        // Kembalikan sebagai respons gambar SVG
+        return response($qrCode)->header('Content-Type', 'image/svg+xml');
     }
 }

@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'Halaman Utama')</title>
 
-     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -16,15 +16,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.6/dist/sweetalert2.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    
+
     @stack('css')
     <style>
         body {
             font-family: 'Poppins', sans-serif;
         }
+
         .brand-link .brand-image {
             /* Pastikan lebar dan tinggi sama untuk membuat lingkaran sempurna */
-            width: 33px; /* Ukuran default AdminLTE */
+            width: 33px;
+            /* Ukuran default AdminLTE */
             height: 33px;
             /* Properti paling penting:
                - Mencegah gambar menjadi gepeng/terdistorsi.
@@ -32,7 +34,6 @@
             object-fit: cover !important;
             border-radius: 50%;
         }
-
     </style>
 </head>
 
@@ -99,7 +100,9 @@
             });
         @endif
     </script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     @stack('scripts')
+
 </body>
 
 </html>
