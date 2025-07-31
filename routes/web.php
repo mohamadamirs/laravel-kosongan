@@ -35,6 +35,8 @@ use App\Http\Controllers\Peserta\LengkapiDataController;
 use App\Http\Controllers\Peserta\KegiatanController as PesertaKegiatanController;
 use App\Http\Controllers\Peserta\AbsensiController as PesertaAbsensiController;
 use App\Http\Controllers\Peserta\IzinCutiController as PesertaIzinCutiController;
+use App\Http\Controllers\Peserta\BeritaController as PesertaBeritaController; // <-- Tambahkan ini di atas
+
 
 /*
 |------------------ --------------------------------------------------------
@@ -137,6 +139,7 @@ Route::middleware(['auth', 'role:peserta'])->prefix('peserta')->name('peserta.')
         Route::resource('absensi', PesertaAbsensiController::class)->only(['index', 'store']);
         Route::resource('izin-cuti', PesertaIzinCutiController::class)->only(['index', 'create', 'store', 'show']);
         Route::get('absensi/scan', [PesertaAbsensiController::class, 'showScanner'])->name('absensi.scan.show');
+    Route::resource('berita', PesertaBeritaController::class)->only(['create', 'store']);
     });
 });
 

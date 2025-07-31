@@ -118,6 +118,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('peserta.berita.create') }}"
+                            class="nav-link {{ request()->routeIs('peserta.berita.create') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-bullhorn"></i>
+                            <p>Ajukan Berita</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('peserta.izin-cuti.index') }}"
                             class="nav-link {{ request()->routeIs('peserta.izin-cuti.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-alt"></i>
@@ -139,7 +146,8 @@
                 {{-- ====================================================== --}}
                 @if (in_array($user->role, ['pembimbing_instansi', 'pembimbing_kominfo']))
                     @php
-                        $prefix = $user->role == 'pembimbing_instansi' ? 'pembimbing.instansi.' : 'pembimbing.lapangan.';
+                        $prefix =
+                            $user->role == 'pembimbing_instansi' ? 'pembimbing.instansi.' : 'pembimbing.lapangan.';
                     @endphp
                     <li class="nav-header">MENU PEMBIMBING</li>
                     <li class="nav-item">
